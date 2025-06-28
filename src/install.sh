@@ -2,7 +2,7 @@ get_desired_pkgs() {
   local pkgs=()
   for set in "${system_packages[@]}"; do
     local pkg_list=()
-    mapfile -t pkg_list <<< "${packages_by_set[$set]}"
+    mapfile -t pkg_list <<<"${packages_by_set[$set]}"
     for pkg in "${pkg_list[@]}"; do
       [[ -z "$pkg" ]] && continue
       pkgs+=("$pkg")
@@ -49,9 +49,9 @@ install_packages() {
   [[ ${#pkgs[@]} -eq 0 ]] && return
   echo "[*] Installing packages: ${pkgs[*]}"
   if [ "$DRY_RUN" = 1 ]; then
-    echo "[DRY RUN] sudo pacman -S --noconfirm ${pkgs[*]}"
+    echo "[DRY RUN] sudo pacman -Sy --noconfirm --needed ${pkgs[*]}"
   else
-    sudo pacman -S --noconfirm "${pkgs[@]}"
+    sudo pacman -Sy --noconfirm --needed "${pkgs[@]}"
   fi
 }
 
@@ -68,7 +68,7 @@ install() {
 
 remove_packages() {
   local desired=($(get_desired_pkgs))
-  local installed=($(pacman -Qq))
+  local installed=($(pacman -Qqent))
   local to_remove=()
   for pkg in "${installed[@]}"; do
     if [[ ! " ${desired[*]} " =~ " ${pkg} " ]]; then

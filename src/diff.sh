@@ -4,7 +4,7 @@ diff() {
   declare -A expected_versions
   for set in "${system_packages[@]}"; do
     local pkg_list=()
-    mapfile -t pkg_list <<< "${packages_by_set[$set]}"
+    mapfile -t pkg_list <<<"${packages_by_set[$set]}"
     for pkg in "${pkg_list[@]}"; do
       [[ -z "$pkg" ]] && continue
       desired_pkgs["$pkg"]=1
@@ -16,7 +16,7 @@ diff() {
   declare -A current_pkgs
   while read -r name ver; do
     current_pkgs["$name"]="$ver"
-  done < <(pacman -Q)
+  done < <(pacman -Qent)
   for pkg in "${!desired_pkgs[@]}"; do
     if [[ -z "${current_pkgs[$pkg]}" ]]; then
       echo -e "\033[32m+ $pkg (not installed)\033[0m"
@@ -39,7 +39,7 @@ apply_diff() {
   declare -A expected_versions
   for set in "${system_packages[@]}"; do
     local pkg_list=()
-    mapfile -t pkg_list <<< "${packages_by_set[$set]}"
+    mapfile -t pkg_list <<<"${packages_by_set[$set]}"
     for pkg in "${pkg_list[@]}"; do
       [[ -z "$pkg" ]] && continue
       desired_pkgs["$pkg"]=1
@@ -51,7 +51,7 @@ apply_diff() {
   declare -A current_pkgs
   while read -r name ver; do
     current_pkgs["$name"]="$ver"
-  done < <(pacman -Q)
+  done < <(pacman -Qent)
   to_install=()
   to_remove=()
   for pkg in "${!desired_pkgs[@]}"; do
