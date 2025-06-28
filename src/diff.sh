@@ -1,9 +1,16 @@
 diff() {
-  echo "[*] Comparing current system to config..."]
+  echo "[*] Comparing current system to config..."
   declare -A desired_pkgs
+  declare -A expected_versions
   for set in "${system_packages[@]}"; do
-    for pkg in ${packages_by_set[$set]}; do
+    local pkg_list=()
+    mapfile -t pkg_list <<< "${packages_by_set[$set]}"
+    for pkg in "${pkg_list[@]}"; do
+      [[ -z "$pkg" ]] && continue
       desired_pkgs["$pkg"]=1
+      if [[ -n "${expected_versions_config[$pkg]}" ]]; then
+        expected_versions["$pkg"]="${expected_versions_config[$pkg]}"
+      fi
     done
   done
   declare -A current_pkgs
@@ -19,7 +26,7 @@ diff() {
   done
   for pkg in "${!current_pkgs[@]}"; do
     if [[ -z "${desired_pkgs[$pkg]}" ]]; then
-      echo -e "\033[31m- $pkg=${current_pkgs[$pkg]} (not in config)\033[0m"
+      echo -e "\033[31m- $pkg (not in config)\033[0m"
     fi
   done
   exit
@@ -31,7 +38,10 @@ apply_diff() {
   declare -A desired_pkgs
   declare -A expected_versions
   for set in "${system_packages[@]}"; do
-    for pkg in ${packages_by_set[$set]}; do
+    local pkg_list=()
+    mapfile -t pkg_list <<< "${packages_by_set[$set]}"
+    for pkg in "${pkg_list[@]}"; do
+      [[ -z "$pkg" ]] && continue
       desired_pkgs["$pkg"]=1
       if [[ -n "${expected_versions_config[$pkg]}" ]]; then
         expected_versions["$pkg"]="${expected_versions_config[$pkg]}"
@@ -69,4 +79,5 @@ apply_diff() {
     sudo pacman -Rns --noconfirm "${to_remove[@]}"
   fi
   echo "[+] System synced with config (version-aware)."
+  exit
 }

@@ -4,10 +4,14 @@ generate_config() {
   echo "# Feel free to edit. Detected packages are in the [detected] set."
   echo
   echo "declare -A packages_by_set=("
-  echo "  [detected]=\"${pkgs[*]}\""
+  echo "  [detected]=\"$(printf '%s\n' "${pkgs[@]}")\""
   echo ")"
   echo
   echo "system_packages=(detected)"
+  echo "aur_packages=()"
+  echo "declare -A aur_packages_by_set=()"
+  echo "declare -A expected_versions_config=()"
+  echo "declare -A dotfiles=()"
   echo "post_install() { echo; } # no-op"
   echo "pre_remove() { echo; } # no-op"
   exit

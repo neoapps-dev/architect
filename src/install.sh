@@ -1,7 +1,10 @@
 get_desired_pkgs() {
   local pkgs=()
   for set in "${system_packages[@]}"; do
-    for pkg in ${packages_by_set[$set]}; do
+    local pkg_list=()
+    mapfile -t pkg_list <<< "${packages_by_set[$set]}"
+    for pkg in "${pkg_list[@]}"; do
+      [[ -z "$pkg" ]] && continue
       pkgs+=("$pkg")
     done
   done
@@ -10,17 +13,21 @@ get_desired_pkgs() {
 
 resolve_aur_packages() {
   local all_pkgs=()
+  [[ ${#aur_packages[@]} -eq 0 ]] && return
   for set in "${aur_packages[@]}"; do
+    [[ -n "${aur_packages_by_set[$set]}" ]] || continue
     for pkg in ${aur_packages_by_set[$set]}; do
       all_pkgs+=("$pkg")
     done
   done
-  echo "${all_pkgs[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '
+  [[ ${#all_pkgs[@]} -eq 0 ]] && return
+  printf '%s\n' "${all_pkgs[@]}" | sort -u | tr '\n' ' '
 }
 
 install_aur() {
   local pkgs
   pkgs=($(resolve_aur_packages))
+  [[ ${#pkgs[@]} -eq 0 ]] && return
   for pkg in "${pkgs[@]}"; do
     echo "[*] Building AUR package: $pkg"
     local build_dir="/tmp/architect-build-$pkg"
@@ -28,43 +35,35 @@ install_aur() {
       echo "[DRY RUN] rm -rf $build_dir"
       echo "[DRY RUN] git clone https://aur.archlinux.org/$pkg.git $build_dir"
       echo "[DRY RUN] cd $build_dir && makepkg -si --noconfirm"
-      continue
+    else
+      rm -rf "$build_dir"
+      git clone "https://aur.archlinux.org/$pkg.git" "$build_dir"
+      cd "$build_dir" && makepkg -si --noconfirm
     fi
-
-    rm -rf "$build_dir"
-    git clone "https://aur.archlinux.org/$pkg.git" "$build_dir" || {
-      echo "[!] Failed to clone $pkg"
-      continue
-    }
-    (cd "$build_dir" && makepkg -si --noconfirm) || {
-      echo "[!] Failed to build/install $pkg"
-      continue
-    }
   done
 }
 
 install_packages() {
-  local desired=($(get_desired_pkgs))
-  local to_install=()
-  for pkg in "${desired[@]}"; do
-    if ! pacman -Qi "$pkg" &>/dev/null; then
-      to_install+=("$pkg")
-    fi
-  done
-
-  if ((${#to_install[@]})); then
-    if ((DRY_RUN)); then
-      echo "[DRY RUN] sudo pacman -S --noconfirm ${to_install[*]}"
-      echo "[DRY RUN] git clone and makepkg -si for all AUR packages."
-    else
-      [[ " $* " != *" --no-snapshot "* ]] && take_snapshot
-      sudo pacman -S --noconfirm "${to_install[@]}"
-      echo "[*] Installing AUR packages..."
-      install_aur
-    fi
+  local pkgs
+  pkgs=($(get_desired_pkgs))
+  [[ ${#pkgs[@]} -eq 0 ]] && return
+  echo "[*] Installing packages: ${pkgs[*]}"
+  if [ "$DRY_RUN" = 1 ]; then
+    echo "[DRY RUN] sudo pacman -S --noconfirm ${pkgs[*]}"
   else
-    echo "[+] All desired packages already installed."
+    sudo pacman -S --noconfirm "${pkgs[@]}"
   fi
+}
+
+install() {
+  echo "[*] Installing packages from config..."
+  [[ " $* " != *" --no-snapshot "* ]] && take_snapshot
+  install_packages
+  install_aur
+  echo "[*] Running post-install hooks..."
+  post_install
+  echo "[+] Installation complete"
+  exit
 }
 
 remove_packages() {
@@ -76,7 +75,6 @@ remove_packages() {
       to_remove+=("$pkg")
     fi
   done
-
   if ((${#to_remove[@]})); then
     echo "[*] Packages to remove: ${to_remove[*]}"
     if ((DRY_RUN)); then

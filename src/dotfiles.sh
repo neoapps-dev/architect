@@ -1,5 +1,9 @@
 sync_dotfiles() {
   local src_dir="${1:-$ARCHITECT_DIR/dotfiles}"
+  [[ ${#dotfiles[@]} -eq 0 ]] && {
+    echo "[!] No dotfiles defined in config"
+    exit 1
+  }
   for name in "${!dotfiles[@]}"; do
     local src="$src_dir/$name"
     local target="${dotfiles[$name]}"
@@ -10,7 +14,6 @@ sync_dotfiles() {
     if [ -L "$target" ] || [ -e "$target" ]; then
       rm -rf "$target"
     fi
-
     ln -s "$src" "$target"
     echo "[+] Linked $src -> $target"
   done
@@ -19,6 +22,10 @@ sync_dotfiles() {
 
 status_dotfiles() {
   local src_dir="${1:-$ARCHITECT_DIR/dotfiles}"
+  [[ ${#dotfiles[@]} -eq 0 ]] && {
+    echo "[!] No dotfiles defined in config"
+    exit 1
+  }
   printf "%-20s %-40s %-10s\n" "Dotfile" "Target Path" "Status"
   for name in "${!dotfiles[@]}"; do
     local src="$src_dir/$name"
