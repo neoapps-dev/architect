@@ -21,7 +21,7 @@ git clone https://github.com/neoapps-dev/architect.git
 cd architect
 make
 sudo make install
-````
+```
 
 ## Usage
 
@@ -60,12 +60,16 @@ Edit `/etc/architect.sh` or set `ARCHITECT_CONFIG` environment variable to point
 
 Architect is modularized under `src/` with:
 
-* `packages.sh` — package resolution and installation
+* `install.sh` — package resolution and installation
 * `snapshots.sh` — snapshot management
-* `aur.sh` — AUR package build logic
+* `validate.sh` — validate config file logic
 * `dotfiles.sh` — dotfiles management
-* `cli.sh` — command-line parsing
-* `utils.sh` — helper functions
+* `z.sh` — command-line parsing (must be last)
+* `misc.sh` — helper functions
+* `test.sh` — self-test functions
+* `main.sh` — environment setup and config sourcing
+* `pacstrap.sh` — pacstrap pacman wrapper support
+* `diff.sh` — shows diff between config and current env, and apply diff function
 
 The [Makefile](Makefile) builds a standalone executable by concatenating all source files.
 
