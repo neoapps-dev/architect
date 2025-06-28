@@ -14,6 +14,7 @@
 [[ " $* " == *" --pacstrap "* ]] && pacstrapper "$2" "$3"
 [[ " $* " == *" --purge-all-snapshots "* ]] && purge_all_snapshots
 [[ " $* " == *" --purge-snapshots "* ]] && purge_snapshots "$2"
+[[ " $* " == *" --test "* ]] && run_test
 remove_packages
 install_packages
 post_install
