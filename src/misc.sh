@@ -25,6 +25,7 @@ Usage:
   $0 [options]
 
 Options:
+  --clone                   Clone Architect config and dotfiles from a git repo
   --make-config             Generate a template config and prints it in stdout
   --validate                Validate the config file at \$ARCHITECT_CONFIG
   --dry-run                 Simulate all operations without making changes

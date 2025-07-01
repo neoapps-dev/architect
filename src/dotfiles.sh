@@ -177,3 +177,42 @@ restore_dotfile() {
   echo "[+] $file restored from $commit"
   exit
 }
+
+clone() {
+  local repo="$1"
+  local repo_dir="${2:-$ARCHITECT_DIR/dotfiles}"
+  if [[ -z "$repo" ]]; then
+    echo "[x] No repository URL provided."
+    exit 1
+  fi
+  echo "[*] Cloning config repo into $repo_dir ..."
+  read -rp "[?] This will DELETE existing dotfiles in $repo_dir! Are you sure? [y/N] " confirm
+  if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    echo "[x] Cancelled."
+    exit 1
+  fi
+  if [[ "$repo_dir" == "/" || -z "$repo_dir" ]]; then
+    echo "[x] Unsafe directory: $repo_dir"
+    exit 1
+  fi
+  rm -rf "$repo_dir"
+  mkdir -p "$(dirname "$repo_dir")"
+  if ! git clone "$repo" "$repo_dir"; then
+    echo "[x] Cloning the repository failed!"
+    exit 1
+  fi
+  echo "[+] Cloned dotfiles."
+  read -rp "[?] Apply Architect config from repo? THIS WILL ERASE CURRENT CONFIG! [y/N] " confirm
+  if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    echo "[+] Not applying config."
+    exit 0
+  fi
+  echo "[*] Applying config..."
+  if ! cp -f "$repo_dir/architect.sh" "$CONFIG_FILE"; then
+    echo "[x] Failed to apply config."
+    exit 1
+  fi
+  echo "[+] Applied config."
+  echo "[+] Config cloned successfully!"
+  echo "[-] Remember to run --apply-diff to sync system with the config."
+}
