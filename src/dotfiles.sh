@@ -115,7 +115,7 @@ push_dotfiles() {
     echo "[x] No remote set. Use --dotfiles-set-url to add one."
     exit
   fi
-  git push
+  git push --set-upstream origin master
   echo "[+] Dotfiles pushed."
   exit
 }
