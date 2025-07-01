@@ -17,7 +17,7 @@
 [[ " $* " == *" --test "* ]] && run_test && exit
 [[ " $* " == *" --dotfiles-git-status "* ]] && git_status_dotfiles "$2" && exit
 [[ " $* " == *" --dotfiles-git-init "* ]] && git_init_dotfiles "$2" && exit
-[[ " $* " == *" --dotfiles-commit "* ]] && commit_dotfiles "$3" "$2" && exit
+[[ " $* " == *" --dotfiles-commit "* ]] && commit_dotfiles "$3" "$2" "$4" && exit
 [[ " $* " == *" --dotfiles-set-url "* ]] && set_url_dotfiles "$2" "$3" && exit
 [[ " $* " == *" --dotfiles-push "* ]] && push_dotfiles "$2" && exit
 remove_packages

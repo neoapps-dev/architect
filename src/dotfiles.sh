@@ -92,14 +92,22 @@ commit_dotfiles() {
   local msg="${2:-No commit message}"
   local temp_config="$src_dir/$(basename "$CONFIG_FILE")"
   echo "[*] Committing dotfiles with message: $msg"
-  cd "$src_dir"
+  cd "$src_dir" || {
+    if [ "$src_dir" = "--include-config" ]; then
+      echo "[*] Found --include-config. Retrying..."
+      commit_dotfiles "${3:-$ARCHITECT_DIR/dotfiles}" "$msg"
+      exit
+    fi
+    echo "[x] Failed to enter $src_dir"
+    exit
+  }
   git add .
-  if [ "$INCLUDE_CONFIG" = "1" ] && [ -n "$CONFIG_FILE" ]; then
+  if [ "$INCLUDE_CONFIG" = "1" ] && [ -n "$CONFIG_FILE" ] && [ -f "$CONFIG_FILE" ]; then
     cp "$CONFIG_FILE" "$temp_config"
     git add "$(basename "$CONFIG_FILE")"
   fi
   git commit -m "$msg"
-  if [ "$INCLUDE_CONFIG" = "1" ] && [ -n "$CONFIG_FILE" ]; then
+  if [ "$INCLUDE_CONFIG" = "1" ] && [ -n "$CONFIG_FILE" ] && [ -f "$temp_config" ]; then
     rm -f "$temp_config"
   fi
   echo "[+] Dotfiles committed."
@@ -109,23 +117,37 @@ commit_dotfiles() {
 push_dotfiles() {
   local src_dir="${1:-$ARCHITECT_DIR/dotfiles}"
   echo "[*] Pushing dotfiles repo to remote"
-  cd "$src_dir"
-  local remote=$(git remote)
+  cd "$src_dir" || {
+    echo "[x] Failed to enter $src_dir"
+    exit
+  }
+  local remote
+  remote=$(git remote)
   if [ -z "$remote" ]; then
     echo "[x] No remote set. Use --dotfiles-set-url to add one."
     exit
   fi
-  git push --set-upstream origin master
+  local branch
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "master")
+  git push --set-upstream origin "$branch"
   echo "[+] Dotfiles pushed."
   exit
 }
 
 set_url_dotfiles() {
-  local src_dir="${2:-$ARCHITECT_DIR/dotfiles}"
   local url="$1"
+  local src_dir="${2:-$ARCHITECT_DIR/dotfiles}"
+  if [ -z "$url" ]; then
+    echo "[x] Remote URL required."
+    exit
+  fi
   echo "[*] Setting remote URL to $url"
-  cd "$src_dir"
-  local remote=$(git remote)
+  cd "$src_dir" || {
+    echo "[x] Failed to enter $src_dir"
+    exit
+  }
+  local remote
+  remote=$(git remote)
   if [ -z "$remote" ]; then
     git remote add origin "$url"
   else
