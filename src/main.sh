@@ -14,7 +14,9 @@ elif [[ " $* " != *" --make-config "* ]]; then
 fi
 DRY_RUN=0
 FORCE=0
+INCLUDE_CONFIG=0
 ARCHITECT_DIR="${ARCHITECT_DIR:-$HOME/.architect}"
 [[ " $* " == *" --dry-run "* ]] && DRY_RUN=1
 [[ " $* " == *" --force "* ]] && FORCE=1
+[[ " $* " == *" --include-config " ]] && INCLUDE_CONFIG=1
 mkdir -p ~/.architect/snapshots

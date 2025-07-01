@@ -64,3 +64,44 @@ edit_dotfile() {
   ${EDITOR:-nano} "$src"
   exit
 }
+
+git_status_dotfiles() {
+  local src_dir="${1:-$ARCHITECT_DIR/dotfiles}"
+  if [ ! -d "$src_dir/.git" ]; then
+    echo "[x] Dotfiles repo not initialized."
+    echo "[x] Use --dotfiles-git-init"
+    exit 1
+  fi
+  cd "$src_dir" || return 1
+  git status --short --branch
+  exit
+}
+
+git_init_dotfiles() {
+  local src_dir="${1:-$ARCHITECT_DIR/dotfiles}"
+  echo "[*] Initializing dotfiles git repo at $src_dir"
+  mkdir -p "$src_dir"
+  cd "$src_dir"
+  git init
+  echo "[+] Dotfiles git repo initialized."
+  exit
+}
+
+commit_dotfiles() {
+  local src_dir="${1:-$ARCHITECT_DIR/dotfiles}"
+  local msg="${2:-No commit message}"
+  local temp_config="$src_dir/$(basename "$CONFIG_FILE")"
+  echo "[*] Committing dotfiles with message: $msg"
+  cd "$src_dir"
+  git add .
+  if [ "$INCLUDE_CONFIG" = "1" ] && [ -n "$CONFIG_FILE" ]; then
+    cp "$CONFIG_FILE" "$temp_config"
+    git add "$(basename "$CONFIG_FILE")"
+  fi
+  git commit -m "$msg"
+  if [ "$INCLUDE_CONFIG" = "1" ] && [ -n "$CONFIG_FILE" ]; then
+    rm -f "$temp_config"
+  fi
+  echo "[+] Dotfiles committed."
+  exit
+}

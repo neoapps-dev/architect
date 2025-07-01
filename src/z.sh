@@ -15,6 +15,9 @@
 [[ " $* " == *" --purge-all-snapshots "* ]] && purge_all_snapshots && exit
 [[ " $* " == *" --purge-snapshots "* ]] && purge_snapshots "$2" && exit
 [[ " $* " == *" --test "* ]] && run_test && exit
+[[ " $* " == *" --dotfiles-git-status "* ]] && git_status_dotfiles "$2" && exit
+[[ " $* " == *" --dotfiles-git-init "* ]] && git_init_dotfiles "$2" && exit
+[[ " $* " == *" --dotfiles-commit "* ]] && commit_dotfiles "$2" "$3" && exit
 remove_packages
 install_packages
 post_install
