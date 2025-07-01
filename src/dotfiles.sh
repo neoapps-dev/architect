@@ -156,3 +156,24 @@ set_url_dotfiles() {
   echo "[+] Remote URL set."
   exit
 }
+
+restore_dotfile() {
+  local src_dir="${3:-$ARCHITECT_DIR/dotfiles}"
+  local file="$1"
+  local commit="$2"
+  echo "[*] Restoring $file from commit $commit"
+  cd "$src_dir" || {
+    echo "[x] Dotfiles directory not found: $src_dir"
+    exit
+  }
+  if ! git cat-file -e "$commit:$file" 2>/dev/null; then
+    echo "[x] Commit or file not found in repo."
+    exit
+  fi
+  git show "$commit:$file" >"$file" || {
+    echo "[x] Failed to extract $file from $commit"
+    exit
+  }
+  echo "[+] $file restored from $commit"
+  exit
+}

@@ -39,7 +39,7 @@ Options:
   --purge-snapshots <last>  Purge all saved snapshots and keep last <last> (default: 3)
   --install-aur-only        Build and install only AUR packages
   --pacstrap <dir>          Bootstrap a new Arch system at <dir> using config
-  --dotfiles-sync|edit|status
+  --dotfiles-sync|edit|status|restore|git-init|git-status|commit|push|set-url
                            Manage dotfiles defined in config
   --help                    Show this help message
   --version                 Show Architect version

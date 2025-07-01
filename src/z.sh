@@ -20,6 +20,7 @@
 [[ " $* " == *" --dotfiles-commit "* ]] && commit_dotfiles "$3" "$2" "$4" && exit
 [[ " $* " == *" --dotfiles-set-url "* ]] && set_url_dotfiles "$2" "$3" && exit
 [[ " $* " == *" --dotfiles-push "* ]] && push_dotfiles "$2" && exit
+[[ " $* " == *" --dotfiles-restore "* ]] && restore_dotfile "$2" "$3" "$4" && exit
 remove_packages
 install_packages
 post_install
