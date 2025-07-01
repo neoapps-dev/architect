@@ -105,3 +105,32 @@ commit_dotfiles() {
   echo "[+] Dotfiles committed."
   exit
 }
+
+push_dotfiles() {
+  local src_dir="${1:-$ARCHITECT_DIR/dotfiles}"
+  echo "[*] Pushing dotfiles repo to remote"
+  cd "$src_dir"
+  local remote=$(git remote)
+  if [ -z "$remote" ]; then
+    echo "[x] No remote set. Use --dotfiles-set-url to add one."
+    exit
+  fi
+  git push
+  echo "[+] Dotfiles pushed."
+  exit
+}
+
+set_url_dotfiles() {
+  local src_dir="${2:-$ARCHITECT_DIR/dotfiles}"
+  local url="$1"
+  echo "[*] Setting remote URL to $url"
+  cd "$src_dir"
+  local remote=$(git remote)
+  if [ -z "$remote" ]; then
+    git remote add origin "$url"
+  else
+    git remote set-url origin "$url"
+  fi
+  echo "[+] Remote URL set."
+  exit
+}
