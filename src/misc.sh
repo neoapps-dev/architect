@@ -36,6 +36,7 @@ Options:
   --apply-diff              Install/remove packages to match config
   --no-snapshot             Skip creating automatic snapshot
   --list-snapshots          List saved snapshots
+  --generate-completions    Generate autocompletes for bash and fish
   --purge-all-snapshots     Purge all saved snapshots (USE WITH CAUTION)
   --purge-snapshots <last>  Purge all saved snapshots and keep last <last> (default: 3)
   --install-aur-only        Build and install only AUR packages

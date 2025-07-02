@@ -21,7 +21,8 @@
 [[ " $* " == *" --dotfiles-set-url "* ]] && set_url_dotfiles "$2" "$3" && exit
 [[ " $* " == *" --dotfiles-push "* ]] && push_dotfiles "$2" && exit
 [[ " $* " == *" --dotfiles-restore "* ]] && restore_dotfile "$2" "$3" "$4" && exit
-[[ " $* " == *" --clone "* ]] && clone "$2" "$3"
+[[ " $* " == *" --clone "* ]] && clone "$2" "$3" && exit
+[[ " $* " == *" --generate-completions "* ]] && generate_completions "$2" && exit
 remove_packages
 install_packages
 post_install
