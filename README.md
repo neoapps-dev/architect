@@ -39,7 +39,7 @@ architect --dotfiles-sync
 You can define your package sets in the config file, for example:
 
 ```bash
-declare -A packages_by_set=(
+packages_by_set=(
   [base]="bash coreutils linux linux-firmware"
   [dev]="git gcc make gdb"
   [media]="mpv ffmpeg vlc"
