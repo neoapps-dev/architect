@@ -55,11 +55,11 @@ edit_dotfile() {
   local src="$src_dir/$name"
   if [ -z "$name" ]; then
     echo "[!] architect --dotfiles-edit <name>"
-    return 1
+    exit 1
   fi
   if [ ! -e "$src" ]; then
     echo "[!] Dotfile source not found: $src"
-    return 1
+    exit 1
   fi
   ${EDITOR:-nano} "$src"
   exit
@@ -72,7 +72,7 @@ git_status_dotfiles() {
     echo "[x] Use --dotfiles-git-init"
     exit 1
   fi
-  cd "$src_dir" || return 1
+  cd "$src_dir" || exit 1
   git status --short --branch
   exit
 }
