@@ -41,6 +41,7 @@ install_aur() {
       cd "$build_dir" && makepkg -si --noconfirm
     fi
   done
+  exit
 }
 
 install_packages() {
