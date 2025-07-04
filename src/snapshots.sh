@@ -39,27 +39,34 @@ rollback() {
   [[ -z "$snap" ]] && echo "Invalid selection." && exit 1
   echo "[*] Restoring snapshot $snap"
   declare -A snapshot_pkgs
-  while read -r line; do
+  mapfile -t lines <"$ARCHITECT_DIR/snapshots/$snap"
+  for line in "${lines[@]}"; do
     [[ -n "$line" ]] || continue
-    local pkg_name="${line%%=*}"
-    local pkg_ver="${line#*=}"
+    pkg_name="${line%%=*}"
+    pkg_ver="${line#*=}"
     snapshot_pkgs["$pkg_name"]="$pkg_ver"
-  done <"$ARCHITECT_DIR/snapshots/$snap"
+  done
   local to_install=()
   for pkg in "${!snapshot_pkgs[@]}"; do
     if ! pacman -Qi "$pkg" &>/dev/null; then
       to_install+=("${pkg}=${snapshot_pkgs[$pkg]}")
     fi
   done
-  [[ ${#to_install[@]} -gt 0 ]] && sudo pacman -S --noconfirm "${to_install[@]}"
-  local current_pkgs=($(pacman -Qq))
+  if [[ ${#to_install[@]} -gt 0 ]]; then
+    echo "[*] Installing missing packages..."
+    sudo pacman -S --noconfirm "${to_install[@]}"
+  fi
+  mapfile -t current_pkgs < <(pacman -Qq)
   local to_remove=()
   for pkg in "${current_pkgs[@]}"; do
     if [[ -z "${snapshot_pkgs[$pkg]}" ]]; then
       to_remove+=("$pkg")
     fi
   done
-  [[ ${#to_remove[@]} -gt 0 ]] && sudo pacman -Rns --noconfirm "${to_remove[@]}"
+  if [[ ${#to_remove[@]} -gt 0 ]]; then
+    echo "[*] Removing extra packages..."
+    sudo pacman -Rns --noconfirm "${to_remove[@]}"
+  fi
   echo "[+] System rolled back to snapshot: $snap"
   exit
 }
